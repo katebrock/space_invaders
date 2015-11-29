@@ -5,14 +5,14 @@
     this.gameSize = { x: canvas.width, y: canvas.height };
     // console.log("hi")
 
-    this.bodies = createInvaders(this).concat[new Player(this, gameSize)];
+    this.bodies = createInvaders(this).concat[new Player(this, this.gameSize)];
 
     var self = this;
-    loadSound("shoot.wav", function(shootSound) {
+    loadSound("/shoot.wav", function(shootSound) {                                 ////
       self.shootSound = shootSound;
       var tick = function() {
         self.update();
-        self.draw(screen, gameSize);
+        self.draw(screen, self.gameSize);
         requestAnimationFrame(tick);
       };
 
@@ -24,13 +24,24 @@
     update: function() {
       var bodies = this.bodies;
       var notCollidingWithAnything = function(b1) {
-        return bodies.filter(function(b2) { return colliding(b1, b2);}).length === 0}
+        return bodies.filter(function(b2) { return colliding(b1, b2); }).length === 0;
+      };
+
+      var gameSize = this.gameSize;
+      var onScreen = function(b) {
+        return (
+          b.center.x < gameSize.x && b.center.x > 0 &&
+          b.center.y < gameSize.y && b.center.y > 0);
+
+      };
+
       this.bodies = this.bodies.filter(notCollidingWithAnything);
 
-      for (var i = 0; i< this.bodies.length; i++) {
+      for (var i = 0; i < this.bodies.length; i++) {
         this.bodies[i].update();
       }
     },
+
     draw: function(screen, gameSize) {
       screen.clearRect(0, 0, gameSize.x, gameSize.y)
       for (var i = 0; i < this.bodies.length; i++) {
@@ -70,6 +81,8 @@
         var bullet = new Bullet({ x: this.center.x, y: this.center.y - this.size.x / 2},
                             {x: 0, y: -6 });
             this.game.addBody(bullet);
+            this.game.shootSound.load();
+            this.game.shootSound.play();
       }
     }
   };
@@ -86,7 +99,8 @@
     update: function() {
       // console.log("hello")
       if (this.patrolX < 0 || this.patrolX > 40) {
-        this.speedX = -this.speedX;
+        this.speedX = -this.speedX
+        this.center.y +=8;
       }
 
       this.center.x += this.speedX;
@@ -109,6 +123,7 @@
     }
     return invaders;
   };
+
 
   Bullet.prototype = {
     update: function() {
